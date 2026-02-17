@@ -1,4 +1,4 @@
-from utils.helpers import HEAT_THRESHOLD
+from backend.utils.helpers import HEAT_THRESHOLD
 
 def mitigate(cell):
     suggestions = []
