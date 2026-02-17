@@ -1,14 +1,9 @@
-from utils.helpers import calculate_heat, classify_zone, HEAT_THRESHOLD
+from utils.helpers import HEAT_THRESHOLD
 
 def mitigate(cell):
     suggestions = []
 
     if cell["heat"] > HEAT_THRESHOLD:
-
-        if cell["tree"] < 20:
-            cell["tree"] += 15
-            cell["building"] -= 10
-            suggestions.append("Increase Trees")
 
         if cell["roof"] == "normal":
             cell["roof"] = "cool"
@@ -22,7 +17,7 @@ def mitigate(cell):
     return suggestions
 
 
-# ---------------- TESTING BLOCK ----------------
+# -------- TEST BLOCK --------
 if __name__ == "__main__":
     test_cell = {
         "heat": 42,
