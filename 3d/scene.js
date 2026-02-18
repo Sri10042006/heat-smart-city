@@ -47,6 +47,9 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(10, 20, 10);
 scene.add(light);
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(ambientLight);
+
 function createBuilding(x, z, height, color) {
   const geometry = new THREE.BoxGeometry(2, height, 2);
   const material = new THREE.MeshPhongMaterial({ color: color });
@@ -93,5 +96,7 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
+const gridHelper = new THREE.GridHelper(50, 50);
+scene.add(gridHelper);
 
 
