@@ -40,3 +40,12 @@ for (let i = -5; i <= 5; i += 3) {
     createBuilding(i, j, height, 0xff0000);
   }
 }
+
+
+function animate() {
+  requestAnimationFrame(animate);
+  scene.rotation.y += 0.002;
+  renderer.render(scene, camera);
+}
+
+animate();
