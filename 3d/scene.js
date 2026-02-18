@@ -57,7 +57,7 @@ for (let i = -5; i <= 5; i += 3) {
 
 function animate() {
   requestAnimationFrame(animate);
-  scene.rotation.y += 0.002;
+  controls.update();
   renderer.render(scene, camera);
 }
 
@@ -70,3 +70,7 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
+
+// Orbit Controls
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
