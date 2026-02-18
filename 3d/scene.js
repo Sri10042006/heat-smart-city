@@ -37,9 +37,22 @@ function createBuilding(x, z, height, color) {
 for (let i = -5; i <= 5; i += 3) {
   for (let j = -5; j <= 5; j += 3) {
     const height = Math.random() * 8 + 2;
-    createBuilding(i, j, height, 0xff0000);
+
+    // Heat-based color logic
+    let color;
+
+    if (height > 8) {
+      color = 0xff0000; // very hot - red
+    } else if (height > 5) {
+      color = 0xff6600; // medium hot - orange
+    } else {
+      color = 0xffff00; // cooler - yellow
+    }
+
+    createBuilding(i, j, height, color);
   }
 }
+
 
 
 function animate() {
