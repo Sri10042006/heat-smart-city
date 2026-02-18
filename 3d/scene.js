@@ -22,6 +22,14 @@ document.body.appendChild(renderer.domElement);
 // Orbit Controls
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.enableRotate = true;
+controls.enableZoom = true;
+controls.enablePan = true;
+
+controls.target.set(0, 0, 0);
+controls.update();
+
+
 
 // Light
 const light = new THREE.DirectionalLight(0xffffff, 1);
