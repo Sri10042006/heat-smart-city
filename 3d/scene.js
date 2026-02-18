@@ -24,3 +24,19 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(10, 20, 10);
 scene.add(light);
 
+function createBuilding(x, z, height, color) {
+  const geometry = new THREE.BoxGeometry(2, height, 2);
+  const material = new THREE.MeshPhongMaterial({ color: color });
+  const building = new THREE.Mesh(geometry, material);
+  
+  building.position.set(x, height / 2, z);
+  scene.add(building);
+}
+
+// Create grid of buildings
+for (let i = -5; i <= 5; i += 3) {
+  for (let j = -5; j <= 5; j += 3) {
+    const height = Math.random() * 8 + 2;
+    createBuilding(i, j, height, 0xff0000);
+  }
+}
