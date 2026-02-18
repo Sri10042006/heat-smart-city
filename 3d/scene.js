@@ -62,22 +62,27 @@ function createBuilding(x, z, height, color) {
 // Create grid of buildings
 for (let i = -5; i <= 5; i += 3) {
   for (let j = -5; j <= 5; j += 3) {
-    const height = Math.random() * 8 + 2;
 
-    // Heat-based color logic
+    const temperature = Math.random() * 15 + 25; 
+    // Simulated temperature: 25°C to 40°C
+
+    const height = temperature - 20; 
+    // Taller building = hotter area
+
     let color;
 
-    if (height > 8) {
-      color = 0xff0000; // very hot - red
-    } else if (height > 5) {
-      color = 0xff6600; // medium hot - orange
+    if (temperature > 37) {
+      color = 0xff0000; // very hot
+    } else if (temperature > 32) {
+      color = 0xff6600; // medium
     } else {
-      color = 0xffff00; // cooler - yellow
+      color = 0xffff00; // mild
     }
 
     createBuilding(i, j, height, color);
   }
 }
+
 
 
 
