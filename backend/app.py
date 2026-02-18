@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from model.predict import mitigate
 
-
 app = Flask(__name__)
 
 @app.route("/")
@@ -14,7 +13,6 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.json  # input from frontend / Postman
-
     suggestions = mitigate(data)
 
     return jsonify({

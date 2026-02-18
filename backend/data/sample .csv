@@ -1,1 +1,8 @@
+city,area,temperature,humidity,road_temp,tree_cover,roof_type,heat_index
+Chennai,T Nagar,38,70,45,15,normal,85
+Chennai,Velachery,36,68,42,25,normal,78
+Salem,Hasthampatti,35,65,40,30,cool,72
+Salem,Suramangalam,37,72,44,20,normal,82
+Coimbatore,Gandhipuram,34,60,38,35,cool,68
+Madurai,Anna Nagar,39,75,46,10,normal,88
 
