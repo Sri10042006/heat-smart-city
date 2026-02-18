@@ -26,9 +26,20 @@ controls.enableRotate = true;
 controls.enableZoom = true;
 controls.enablePan = true;
 
+
+
+controls.mouseButtons = {
+  LEFT: THREE.MOUSE.ROTATE,
+  MIDDLE: THREE.MOUSE.DOLLY,
+  RIGHT: THREE.MOUSE.PAN
+};
+controls.touches = {
+  ONE: THREE.TOUCH.ROTATE,
+  TWO: THREE.TOUCH.DOLLY_PAN
+};
+
 controls.target.set(0, 0, 0);
 controls.update();
-
 
 
 // Light
