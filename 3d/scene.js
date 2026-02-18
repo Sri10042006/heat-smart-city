@@ -49,3 +49,11 @@ function animate() {
 }
 
 animate();
+
+// Ground
+const groundGeometry = new THREE.PlaneGeometry(50, 50);
+const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x555555 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+
+ground.rotation.x = -Math.PI / 2;
+scene.add(ground);
