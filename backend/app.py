@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
-from backend.model.predict import mitigate
+from model.predict import mitigate
+
 
 app = Flask(__name__)
 
