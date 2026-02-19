@@ -122,7 +122,8 @@ window.addEventListener("click", (event) => {
     const clickedObject = intersects[0].object;
 
     if (clickedObject.userData.temperature !== undefined) {
-      alert("Temperature: " + clickedObject.userData.temperature.toFixed(1) + " °C");
+     console.log("Clicked!");
+ 
     }
   }
 });
