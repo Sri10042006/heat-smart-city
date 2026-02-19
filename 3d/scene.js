@@ -19,6 +19,11 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// 🔎 Raycaster for click detection
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+
 // Orbit Controls
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -50,14 +55,31 @@ scene.add(light);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
-function createBuilding(x, z, height, color) {
+function createBuilding(x, z, height, color, temperature) {
   const geometry = new THREE.BoxGeometry(2, height, 2);
   const material = new THREE.MeshPhongMaterial({ color: color });
   const building = new THREE.Mesh(geometry, material);
-  
+
   building.position.set(x, height / 2, z);
+
+  // 🔥 Store temperature inside the building
+  building.userData.temperature = temperature;
+
   scene.add(building);
 }
+function createBuilding(x, z, height, color, temperature) {
+  const geometry = new THREE.BoxGeometry(2, height, 2);
+  const material = new THREE.MeshPhongMaterial({ color: color });
+  const building = new THREE.Mesh(geometry, material);
+
+  building.position.set(x, height / 2, z);
+
+  // 🔥 Store temperature inside the building
+  building.userData.temperature = temperature;
+
+  scene.add(building);
+}
+
 
 // Create grid of buildings
 for (let i = -5; i <= 5; i += 3) {
@@ -79,9 +101,32 @@ for (let i = -5; i <= 5; i += 3) {
       color = 0xffff00; // mild
     }
 
-    createBuilding(i, j, height, color);
+    createBuilding(i, j, height, color,temperature);
   }
 }
+
+ // 🖱 Click event listener
+window.addEventListener("click", (event) => {
+
+  // Convert mouse position to normalized device coordinates
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // Send ray from camera through mouse position
+  raycaster.setFromCamera(mouse, camera);
+
+  // Check for intersections
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  if (intersects.length > 0) {
+    const clickedObject = intersects[0].object;
+
+    if (clickedObject.userData.temperature !== undefined) {
+      alert("Temperature: " + clickedObject.userData.temperature.toFixed(1) + " °C");
+    }
+  }
+});
+
 
 
 
