@@ -54,7 +54,8 @@ function createBuilding(x, z, height, color) {
   const geometry = new THREE.BoxGeometry(2, height, 2);
   const material = new THREE.MeshPhongMaterial({ color: color });
   const building = new THREE.Mesh(geometry, material);
-  
+   
+
   building.position.set(x, height / 2, z);
   scene.add(building);
 }
@@ -83,7 +84,27 @@ for (let i = -5; i <= 5; i += 3) {
   }
 }
 
+ // 🖱 Click event listener
+window.addEventListener("click", (event) => {
 
+  // Convert mouse position to normalized device coordinates
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // Send ray from camera through mouse position
+  raycaster.setFromCamera(mouse, camera);
+
+  // Check for intersections
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  if (intersects.length > 0) {
+    const clickedObject = intersects[0].object;
+
+    if (clickedObject.userData.temperature !== undefined) {
+      alert("Temperature: " + clickedObject.userData.temperature.toFixed(1) + " °C");
+    }
+  }
+});
 
 
 function animate() {
