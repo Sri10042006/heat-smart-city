@@ -32,9 +32,34 @@ groundMaterial
 ground.rotation.x = -Math.PI/2;
 
 scene.add(ground);
+
+
+
+function createBuilding(x,z,height){
+
+const geometry = new THREE.BoxGeometry(2,height,2);
+
+const material = new THREE.MeshStandardMaterial({
+color:0x888888
+});
+
+const building = new THREE.Mesh(geometry,material);
+
+building.position.set(x,height/2,z);
+
+scene.add(building);
+createBuilding(0,0,6);
+createBuilding(5,0,8);
+createBuilding(-5,0,10);
+createBuilding(0,5,7);
+createBuilding(0,-5,9);
+
+}
+
 light.position.set(10,20,10);
 
 scene.add(light);
+
 
 
 
