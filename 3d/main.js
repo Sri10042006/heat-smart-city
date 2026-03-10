@@ -20,7 +20,7 @@ renderer.setSize(window.innerWidth,window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 
-const light = new THREE.DirectionalLight(0xffffff,1);
+
 const groundGeometry = new THREE.PlaneGeometry(40,40);
 
 const groundMaterial = new THREE.MeshStandardMaterial({
