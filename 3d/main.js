@@ -69,17 +69,19 @@ createBuilding(5,0,8);
 createBuilding(-5,0,10);
 createBuilding(0,5,7);
 createBuilding(0,-5,9);
-light.position.set(10,20,10);
 
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(10,20,10);
 scene.add(light);
 
 
 
 
 function animate(){
-requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
-controls.update();
+    controls.update();
 
-renderer.render(scene, camera);
+    renderer.render(scene, camera);
 }
+animate();
