@@ -1,87 +1,118 @@
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/controls/OrbitControls.js";
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
 
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
 75,
-window.innerWidth/window.innerHeight,
+window.innerWidth / window.innerHeight,
 0.1,
 1000
 );
-camera.position.set(10,10,10);
-camera.lookAt(0,0,0);
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
-
-renderer.setSize(window.innerWidth,window.innerHeight);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 
+camera.position.set(0,50,80);
+camera.lookAt(0,0,0);
 
-const groundGeometry = new THREE.PlaneGeometry(40,40);
-
-const groundMaterial = new THREE.MeshStandardMaterial({
-color:0xdddddd
+const groundGeometry = new THREE.PlaneGeometry(200,200);
+const material = new THREE.MeshStandardMaterial({
+color:color
 });
 
-const ground = new THREE.Mesh(
-groundGeometry,
-groundMaterial
-);
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
 
 ground.rotation.x = -Math.PI/2;
 
 scene.add(ground);
 
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(20,50,10);
+scene.add(light);
+
 function createBuilding(x,z,height){
 
-const geometry = new THREE.BoxGeometry(2,height,2);
 
-const colors = [0x888888, 0xa0a0a0, 0x777777, 0x999999];
+const geometry = new THREE.BoxGeometry(4,height,4);
+const temperature = Math.random()*15 + 30;
 
-const material = new THREE.MeshStandardMaterial({
-color: colors[Math.floor(Math.random() * colors.length)]
-});
+let color;
 
+if(temperature < 35){
+color = 0x00ff00;   // green
+}
+else if(temperature < 40){
+color = 0xffff00;   // yellow
+}
+else{
+color = 0xff0000;   // red
+} 
+const material = new THREE.MeshStandardMaterial({color:0x888888});
 
 const building = new THREE.Mesh(geometry,material);
 
 building.position.set(x,height/2,z);
 
+/* heat data */
+building.userData = {
+heat: temperature.toFixed(1),
+reason: "Dense concrete buildings",
+solution: "Add trees and reflective roofs"
+};
+
 scene.add(building);
 
+}
+for(let x=-40; x<=40; x+=10){
+
+for(let z=-40; z<=40; z+=10){
+
+const height = Math.random()*20 + 5;
+
+createBuilding(x,z,height);
 
 }
-for (let x = -40; x <= 40; x += 10) {
-    for (let z = -40; z <= 40; z += 10) {
 
-        const height = Math.random() * 12 + 4;
-
-        createBuilding(x, z, height);
-
-    }
 }
-createBuilding(0,0,6);
-createBuilding(5,0,8);
-createBuilding(-5,0,10);
-createBuilding(0,5,7);
-createBuilding(0,-5,9);
 
-const light = new THREE.DirectionalLight(0xffffff,1);
-light.position.set(10,20,10);
-scene.add(light);
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
+window.addEventListener("click",(event)=>{
 
+mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+raycaster.setFromCamera(mouse,camera);
+
+const intersects = raycaster.intersectObjects(scene.children);
+
+if(intersects.length > 0){
+
+const obj = intersects[0].object;
+
+if(obj.userData.heat){
+
+alert(
+"Heat Level: "+obj.userData.heat+" °C\n"+
+"Reason: "+obj.userData.reason+"\n"+
+"Solution: "+obj.userData.solution
+);
+
+}
+
+}
+
+});
 
 function animate(){
-    requestAnimationFrame(animate);
+requestAnimationFrame(animate);
 
-    controls.update();
 
-    renderer.render(scene, camera);
+
+renderer.render(scene, camera);
 }
+
 animate();
