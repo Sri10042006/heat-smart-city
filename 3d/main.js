@@ -34,28 +34,28 @@ scene.add(light);
 
 function createBuilding(x,z,height){
 
-
 const geometry = new THREE.BoxGeometry(4,height,4);
+
 const temperature = Math.random()*15 + 30;
 
 let color;
 
 if(temperature < 35){
-color = 0x00ff00;   // green
+color = 0x00ff00;
 }
 else if(temperature < 40){
-color = 0xffff00;   // yellow
+color = 0xffff00;
 }
 else{
-color = 0xff0000;   // red
-} 
-const material = new THREE.MeshStandardMaterial({color:0x888888});
+color = 0xff0000;
+}
+
+const material = new THREE.MeshStandardMaterial({color:color});
 
 const building = new THREE.Mesh(geometry,material);
 
 building.position.set(x,height/2,z);
 
-/* heat data */
 building.userData = {
 heat: temperature.toFixed(1),
 reason: "Dense concrete buildings",
