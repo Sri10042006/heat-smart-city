@@ -50,7 +50,9 @@ else{
 color = 0xff0000;
 }
 
-const material = new THREE.MeshStandardMaterial({color:color});
+const material = new THREE.MeshStandardMaterial({
+color: color
+});
 
 const building = new THREE.Mesh(geometry,material);
 
