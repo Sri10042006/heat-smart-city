@@ -1,5 +1,10 @@
 from flask import Flask, jsonify, request
 from model.predict import mitigate
+from flask_cors import CORS
+app = Flask(__name__)
+CORS(app)  # Add this one line!
+
+pip install flask-cors
 
 app = Flask(__name__)
 
