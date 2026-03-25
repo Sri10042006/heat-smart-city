@@ -50,3 +50,15 @@ const ADV = {
     "🔥 Ensure heating systems are maintained",
   ],
 };
+
+// Add this at the bottom of data.js
+async function fetchLiveWeather(cityName) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/weather?city=${cityName}`);
+    const data = await res.json();
+    return data; // use this to override hardcoded city data
+  } catch (e) {
+    console.warn('Backend not available, using static data');
+    return null; // fallback to CITIES array
+  }
+}
