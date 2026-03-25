@@ -4,18 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Urban Smart City Climate Predictor</title>
-
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
-  <!-- Styles -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-
-  <!-- ░░ LOADING SCREEN ░░ -->
   <div id="loading">
     <div class="load-city">
       <div class="load-bar" style="height:32px;animation-delay:0s"></div>
@@ -29,8 +24,6 @@
     <div class="load-ring"></div>
     <p>INITIALIZING CLIMATE SYSTEM</p>
   </div>
-
-  <!-- ░░ HEADER ░░ -->
   <div id="hdr">
     <h1>⬡ URBAN SMART CITY CLIMATE PREDICTOR</h1>
     <div class="hdr-legend">
@@ -39,24 +32,14 @@
       <div class="leg"><div class="leg-dot" style="background:#00d4ff;color:#00d4ff"></div>COOL</div>
     </div>
   </div>
-
-  <!-- ░░ SEARCH BAR ░░ -->
   <div id="searchWrap">
     <input id="cityInput" type="text" placeholder="Search for a city…" />
     <button id="searchBtn">SEARCH</button>
   </div>
-
-  <!-- ░░ 2D MAP ░░ -->
   <div id="mapWrap">
-    <canvas id="mapCanvas"></canvas>
+    <div id="leafletMap"></div>
   </div>
-
-  <!-- ░░ THREE.JS 3D SCENE ░░ -->
-  <div id="scene3d">
-    <canvas id="c3d"></canvas>
-  </div>
-
-  <!-- ░░ WEATHER PANEL ░░ -->
+  <div id="scene3d"><canvas id="c3d"></canvas></div>
   <div id="wp">
     <div class="wp-top">
       <div class="wp-label">CURRENT WEATHER</div>
@@ -65,55 +48,36 @@
     <div id="wpBadge" class="wp-badge">—</div>
     <div class="wp-stats">
       <div class="wp-row"><span class="wp-icon">🌡️</span><span class="wp-key">Temperature</span><span class="wp-val" id="wpTemp">—</span></div>
-      <div class="wp-row"><span class="wp-icon">💧</span><span class="wp-key">Humidity</span>   <span class="wp-val" id="wpHum">—</span></div>
-      <div class="wp-row"><span class="wp-icon">🌤️</span><span class="wp-key">Condition</span>  <span class="wp-val" id="wpCond">—</span></div>
-      <div class="wp-row"><span class="wp-icon">💨</span><span class="wp-key">Wind</span>        <span class="wp-val" id="wpWind">—</span></div>
-      <div class="wp-row"><span class="wp-icon">👁️</span><span class="wp-key">UV Index</span>   <span class="wp-val" id="wpUv">—</span></div>
+      <div class="wp-row"><span class="wp-icon">💧</span><span class="wp-key">Humidity</span><span class="wp-val" id="wpHum">—</span></div>
+      <div class="wp-row"><span class="wp-icon">🌤️</span><span class="wp-key">Condition</span><span class="wp-val" id="wpCond">—</span></div>
+      <div class="wp-row"><span class="wp-icon">💨</span><span class="wp-key">Wind</span><span class="wp-val" id="wpWind">—</span></div>
+      <div class="wp-row"><span class="wp-icon">👁️</span><span class="wp-key">UV Index</span><span class="wp-val" id="wpUv">—</span></div>
     </div>
     <div class="wp-adv-hdr">⚠ ADVISORY &amp; SOLUTIONS</div>
     <div class="wp-adv-body" id="wpAdv"></div>
   </div>
-
-  <!-- ░░ BACK BUTTON ░░ -->
   <button id="backBtn" onclick="goBack()">← MAP</button>
-
-  <!-- ░░ ZONE HUD ░░ -->
   <div id="zoneHud">
     <div class="ztag" style="color:#ff3333;background:rgba(255,50,50,.1)">🔴 HOT ZONE</div>
     <div class="ztag" style="color:#ffaa00;background:rgba(255,170,0,.1)">🟠 MODERATE ZONE</div>
     <div class="ztag" style="color:#00d4ff;background:rgba(0,212,255,.1)">🔵 COOL ZONE</div>
   </div>
-
-  <!-- ░░ TOOLTIP ░░ -->
   <div id="tip"></div>
-
-  <!-- ░░ FOOTER HINTS ░░ -->
   <div id="inst">🌍 Click any city pin — or anywhere on the map — to enter 3D heat prediction view</div>
   <div id="ctrl3d">🖱 Drag → Orbit &nbsp;|&nbsp; Scroll → Zoom &nbsp;|&nbsp; Right-drag → Pan</div>
-
-  <!-- ░░ SCRIPTS (order matters) ░░ -->
-  <!--
-    Load order:
-      1. Three.js  (CDN)
-      2. data.js   (CITIES + ADV constants used by map.js & scene3d.js)
-      3. scene3d.js (defines launch3D / goBack — called from map.js)
-      4. map.js    (sets up canvas, calls launch3D on click)
-  -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/data.js"></script>
   <script src="js/scene3d.js"></script>
   <script src="js/map.js"></script>
-
-  <!-- ░░ LOADING SCREEN FADE-OUT ░░ -->
   <script>
     window.addEventListener('load', () => {
       setTimeout(() => {
         const el = document.getElementById('loading');
         el.style.opacity = '0';
         setTimeout(() => el.style.display = 'none', 500);
-      }, 1200);
+      }, 1400);
     });
   </script>
-
 </body>
 </html>

@@ -108,7 +108,7 @@ body {
 
 /* ─── MAP ─── */
 #mapWrap { position: fixed; top: 110px; left: 0; right: 0; bottom: 0; }
-#mapCanvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+/* #mapCanvas removed — replaced by Leaflet #leafletMap */
 
 /* ─── 3D SCENE ─── */
 #scene3d { position: fixed; top: 110px; left: 0; right: 0; bottom: 0; display: none; }

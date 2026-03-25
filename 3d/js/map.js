@@ -1,208 +1,238 @@
 /* ════════════════════════════════════════
    URBAN SMART CITY CLIMATE PREDICTOR
-   js/map.js  —  2D World Map (Canvas)
+   js/map.js  — Real Political Map (Leaflet)
+   Genuine tile-based map like Google Maps
 ════════════════════════════════════════ */
 
-const mapCanvas = document.getElementById('mapCanvas');
-const ctx       = mapCanvas.getContext('2d');
-let MW, MH;
+let leafletMap = null;
+let markerLayer = null;
 
-/* ── Coordinate helpers ── */
-function ll2xy(lat, lng) {
-  const x = (lng + 180) / 360 * MW;
-  const r = lat * Math.PI / 180;
-  const n = Math.log(Math.tan(Math.PI / 4 + r / 2));
-  const y = (Math.PI - n) / (2 * Math.PI) * MH;
-  return { x, y };
+/* ── INIT MAP ── */
+function initMap() {
+  leafletMap = L.map('leafletMap', {
+    center: [20, 10],
+    zoom: 2,
+    minZoom: 2,
+    maxZoom: 10,
+    zoomControl: true,
+    attributionControl: true,
+  });
+
+  // CartoDB Dark Matter — real political map, country borders, roads, place names
+  const cartoDark = L.tileLayer(
+    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }
+  );
+
+  // Stadia Alidade Smooth Dark — another real political dark map
+  const stadiaDark = L.tileLayer(
+    'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+    {
+      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 20,
+    }
+  );
+
+  // CartoDB Voyager — lighter political map option  
+  const cartoVoyager = L.tileLayer(
+    'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }
+  );
+
+  // Default: CartoDB Dark
+  cartoDark.addTo(leafletMap);
+
+  // Layer switcher
+  const baseMaps = {
+    '🌑 Dark Political (Default)': cartoDark,
+    '🌙 Stadia Dark':              stadiaDark,
+    '🗺️ Voyager (Light)':         cartoVoyager,
+  };
+  L.control.layers(baseMaps, null, { position: 'bottomleft' }).addTo(leafletMap);
+
+  addCityMarkers();
+  leafletMap.on('click', onMapClick);
 }
 
-function xy2ll(x, y) {
-  const lng = x / MW * 360 - 180;
-  const n   = Math.PI - 2 * Math.PI * y / MH;
-  const lat = 180 / Math.PI * Math.atan(.5 * (Math.exp(n) - Math.exp(-n)));
-  return { lat, lng };
-}
+/* ── CUSTOM SVG MARKER ICONS ── */
+function makeIcon(city) {
+  const col      = city.level === 'hot'      ? '#ff3333' : city.level === 'moderate' ? '#ffaa00' : '#00d4ff';
+  const glowRgba = city.level === 'hot'      ? '255,50,50' : city.level === 'moderate' ? '255,170,0' : '0,212,255';
+  const id       = 'gf' + Math.random().toString(36).slice(2);
 
-/* ── Resize ── */
-function resizeMap() {
-  MW = mapCanvas.offsetWidth;
-  MH = mapCanvas.offsetHeight;
-  mapCanvas.width  = MW;
-  mapCanvas.height = MH;
-  drawMap();
-}
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="54" viewBox="0 0 42 54">
+    <defs>
+      <radialGradient id="${id}g" cx="50%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="${col}" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="${id}f"><feGaussianBlur stdDeviation="2.5"/></filter>
+    </defs>
+    <ellipse cx="21" cy="21" rx="18" ry="18" fill="url(#${id}g)"/>
+    <circle cx="21" cy="20" r="11" fill="${col}" filter="url(#${id}f)" opacity="0.5"/>
+    <circle cx="21" cy="20" r="10" fill="${col}" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
+    <polygon points="21,50 13,30 29,30" fill="${col}" opacity="0.85"/>
+    <circle cx="21" cy="20" r="4" fill="white" opacity="0.95"/>
+  </svg>`;
 
-/* ── Continents ── */
-function drawContinents() {
-  ctx.fillStyle   = 'rgba(25,75,40,.5)';
-  ctx.strokeStyle = 'rgba(60,140,80,.28)';
-  ctx.lineWidth   = 1;
-
-  const shapes = [
-    // N America
-    [[70,-141],[83,-72],[72,-82],[60,-64],[45,-53],[24,-80],[18,-88],[15,-85],[20,-106],[28,-111],[32,-117],[24,-125]],
-    // S America
-    [[-4,-81],[12,-71],[10,-62],[-5,-35],[-22,-43],[-33,-70],[-55,-65],[-54,-68]],
-    // Europe
-    [[36,-9],[36,28],[55,8],[51,-3],[45,-1],[44,2],[42,-9],[38,-9],[36,-6],[40,28],[55,28],[70,28],[71,26],[60,28]],
-    // Africa
-    [[37,-6],[37,36],[12,42],[-5,40],[-35,27],[-35,18],[-5,12],[5,0],[4,-8],[14,-17],[27,-16]],
-    // Asia
-    [[36,28],[42,28],[55,35],[70,60],[75,110],[70,140],[45,145],[22,115],[8,98],[9,78],[22,72],[26,57],[30,55],[36,59]],
-    // SE Asia
-    [[5,100],[22,120],[10,125],[0,110],[5,100]],
-    // Australia
-    [[-15,129],[-38,141],[-38,147],[-28,154],[-20,148],[-12,135],[-18,122]],
-    // Greenland
-    [[60,-44],[84,-30],[83,-24],[76,-18],[72,-22],[60,-44]],
-    // Japan
-    [[31,130],[45,141],[43,145],[34,136],[31,130]],
-    // UK
-    [[50,-5],[58,-3],[58,1],[51,1],[50,-5]],
-    // Indonesia
-    [[-8,107],[-6,116],[-8,116],[-10,108],[-8,107]],
-  ];
-
-  shapes.forEach(poly => {
-    ctx.beginPath();
-    const pts = poly.map(([la, ln]) => ll2xy(la, ln));
-    ctx.moveTo(pts[0].x, pts[0].y);
-    pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+  return L.divIcon({
+    className: '',
+    html: `<div style="position:relative;cursor:pointer">
+             ${svg}
+             <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+               white-space:nowrap;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;
+               color:rgba(230,245,255,0.95);text-shadow:0 1px 5px rgba(0,0,0,1),0 0 10px rgba(0,0,0,0.9);
+               pointer-events:none;letter-spacing:0.3px;">
+               ${city.name.split(',')[0]}
+             </div>
+           </div>`,
+    iconSize:   [42, 54],
+    iconAnchor: [21, 50],
+    popupAnchor:[0, -52],
   });
 }
 
-/* ── Full map draw ── */
-function drawMap() {
-  // Ocean gradient
-  const og = ctx.createLinearGradient(0, 0, 0, MH);
-  og.addColorStop(0,   '#03102a');
-  og.addColorStop(.5,  '#051630');
-  og.addColorStop(1,   '#020c1e');
-  ctx.fillStyle = og;
-  ctx.fillRect(0, 0, MW, MH);
+/* ── ADD MARKERS + HEAT HALOS ── */
+function addCityMarkers() {
+  markerLayer = L.layerGroup().addTo(leafletMap);
 
-  // Grid
-  ctx.strokeStyle = 'rgba(0,100,200,.06)';
-  ctx.lineWidth   = 1;
-  for (let lat = -80; lat <= 80; lat += 20) {
-    const { y } = ll2xy(lat, 0);
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(MW, y); ctx.stroke();
-  }
-  for (let lng = -180; lng <= 180; lng += 30) {
-    const { x } = ll2xy(0, lng);
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, MH); ctx.stroke();
-  }
-
-  drawContinents();
-
-  // Hot-zone halos
-  CITIES.filter(c => c.level === 'hot').forEach(c => {
-    const { x, y } = ll2xy(c.lat, c.lng);
-    const rg = ctx.createRadialGradient(x, y, 0, x, y, 36);
-    rg.addColorStop(0, 'rgba(255,60,0,.22)');
-    rg.addColorStop(1, 'rgba(255,60,0,0)');
-    ctx.fillStyle = rg;
-    ctx.beginPath(); ctx.arc(x, y, 36, 0, Math.PI * 2); ctx.fill();
+  // Heat halos for hot cities
+  CITIES.filter(c => c.level === 'hot').forEach(city => {
+    L.circle([city.lat, city.lng], {
+      radius:      700000,
+      color:       '#ff3300',
+      fillColor:   '#ff3300',
+      fillOpacity: 0.055,
+      weight:      1,
+      dashArray:   '4 6',
+    }).addTo(leafletMap);
   });
 
-  // City pins
-  CITIES.forEach(c => {
-    const { x, y } = ll2xy(c.lat, c.lng);
-    const col = c.level === 'hot' ? '#ff3333' : c.level === 'moderate' ? '#ffaa00' : '#00d4ff';
+  // Markers
+  CITIES.forEach(city => {
+    const col = city.level === 'hot' ? '#ff4444' : city.level === 'moderate' ? '#ffbb00' : '#00d4ff';
+    const badge = city.level === 'hot' ? '🔴 HOT ZONE' : city.level === 'moderate' ? '🟠 MODERATE' : '🔵 COOL ZONE';
 
-    // Glow
-    const gl = ctx.createRadialGradient(x, y, 0, x, y, 20);
-    gl.addColorStop(0, col + '44'); gl.addColorStop(1, col + '00');
-    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
+    const marker = L.marker([city.lat, city.lng], {
+      icon:  makeIcon(city),
+      title: city.name,
+    });
 
-    // Pin dot
-    ctx.shadowColor = col; ctx.shadowBlur = 14;
-    ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2);
-    ctx.fillStyle   = col; ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.2; ctx.stroke();
-    ctx.shadowBlur  = 0;
+    marker.bindPopup(`
+      <div style="font-family:'DM Sans',sans-serif;min-width:190px;">
+        <div style="font-weight:700;font-size:13px;color:#fff;margin-bottom:5px">${city.name}</div>
+        <div style="color:${col};font-weight:700;font-size:11px;margin-bottom:9px;letter-spacing:1px">${badge}</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:11.5px;color:#9bc">
+          <span>🌡️ Temp</span>     <b style="color:#fff">${city.temp}°C</b>
+          <span>💧 Humidity</span>  <b style="color:#fff">${city.hum}%</b>
+          <span>🌤️ Condition</span> <b style="color:#fff">${city.cond}</b>
+          <span>💨 Wind</span>      <b style="color:#fff">${city.wind}</b>
+          <span>☀️ UV Index</span>  <b style="color:#fff">${city.uv}</b>
+        </div>
+        <button onclick="window._openCity('${city.name}')"
+          style="margin-top:11px;width:100%;padding:8px 0;background:${col};
+                 border:none;border-radius:7px;color:#000;font-weight:800;
+                 font-size:11px;letter-spacing:1.5px;cursor:pointer;
+                 font-family:'DM Sans',sans-serif;transition:filter .2s"
+          onmouseover="this.style.filter='brightness(1.25)'"
+          onmouseout="this.style.filter='brightness(1)'">
+          🏙 VIEW 3D CITY →
+        </button>
+      </div>`, { className: 'climate-popup', maxWidth: 230 });
 
-    // Label
-    ctx.font      = 'bold 10px "DM Sans",sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(230,245,255,.88)';
-    ctx.fillText(c.name.split(',')[0], x, y - 12);
+    markerLayer.addLayer(marker);
+  });
+
+  // Global handler for popup button
+  window._openCity = (name) => {
+    const city = CITIES.find(c => c.name === name);
+    if (city) { leafletMap.closePopup(); launch3D(city); }
+  };
+}
+
+/* ── MAP CLICK HANDLER ── */
+function onMapClick(e) {
+  // Ignore if popup is open
+  if (document.querySelector('.leaflet-popup')) return;
+
+  const { lat, lng } = e.latlng;
+  const dist = c => Math.hypot(c.lat - lat, c.lng - lng);
+  const nearest = CITIES.reduce((a, b) => dist(a) < dist(b) ? a : b);
+
+  if (dist(nearest) < 6) {
+    launch3D(nearest);
+    return;
+  }
+
+  // Unknown region — synth data from nearest
+  launch3D({
+    ...nearest,
+    name: `${Math.abs(lat).toFixed(1)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(1)}°${lng >= 0 ? 'E' : 'W'}`,
+    temp: nearest.temp + Math.round((Math.random() - .5) * 6),
+    hum:  Math.max(10, Math.min(95, nearest.hum + Math.round((Math.random() - .5) * 12))),
+    wind: `${8 + Math.round(Math.random() * 22)} km/h`,
   });
 }
 
-/* ── Tooltip ── */
-const tip = document.getElementById('tip');
-let hovered = null;
-
-mapCanvas.addEventListener('mousemove', e => {
-  const r  = mapCanvas.getBoundingClientRect();
-  const mx = e.clientX - r.left, my = e.clientY - r.top;
-  hovered  = null;
-
-  for (const c of CITIES) {
-    const { x, y } = ll2xy(c.lat, c.lng);
-    if (Math.hypot(mx - x, my - y) < 16) { hovered = c; break; }
-  }
-
-  if (hovered) {
-    tip.style.display = 'block';
-    tip.style.left    = (e.clientX + 14) + 'px';
-    tip.style.top     = (e.clientY - 8)  + 'px';
-    const col = hovered.level === 'hot' ? '#ff4444' : hovered.level === 'moderate' ? '#ffbb00' : '#00d4ff';
-    tip.innerHTML = `<strong>${hovered.name}</strong><br><span style="color:${col}">${hovered.temp}°C · ${hovered.cond}</span>`;
-    mapCanvas.style.cursor = 'pointer';
-  } else {
-    tip.style.display      = 'none';
-    mapCanvas.style.cursor = 'crosshair';
-  }
-});
-
-mapCanvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
-
-mapCanvas.addEventListener('click', e => {
-  const r  = mapCanvas.getBoundingClientRect();
-  const mx = e.clientX - r.left, my = e.clientY - r.top;
-  let clicked = null;
-
-  for (const c of CITIES) {
-    const { x, y } = ll2xy(c.lat, c.lng);
-    if (Math.hypot(mx - x, my - y) < 18) { clicked = c; break; }
-  }
-
-  if (!clicked) {
-    const { lat, lng } = xy2ll(mx, my);
-    const d       = c => Math.hypot(c.lat - lat, c.lng - lng);
-    const nearest = CITIES.reduce((a, b) => d(a) < d(b) ? a : b);
-    clicked = {
-      ...nearest,
-      name: `${lat.toFixed(1)}°N, ${lng.toFixed(1)}°E`,
-      temp: nearest.temp + Math.round((Math.random() - .5) * 5),
-      hum:  Math.max(10, Math.min(95, nearest.hum + Math.round((Math.random() - .5) * 10))),
-      wind: `${10 + Math.round(Math.random() * 20)} km/h`,
-    };
-  }
-
-  tip.style.display = 'none';
-  launch3D(clicked);   // defined in scene3d.js
-});
-
-/* ── Search ── */
+/* ── SEARCH ── */
 document.getElementById('searchBtn').onclick = doSearch;
 document.getElementById('cityInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') doSearch();
 });
-
 function doSearch() {
   const q = document.getElementById('cityInput').value.trim().toLowerCase();
   if (!q) return;
-  const f = CITIES.find(c => c.name.toLowerCase().includes(q));
-  if (f) launch3D(f);
-  else   alert('City not found. Try: New Delhi, Dubai, London, Tokyo…');
+  const city = CITIES.find(c => c.name.toLowerCase().includes(q));
+  if (city) {
+    leafletMap.flyTo([city.lat, city.lng], 5, { duration: 1.2 });
+    setTimeout(() => launch3D(city), 1400);
+  } else {
+    alert('City not found. Try: New Delhi, Dubai, London, Tokyo…');
+  }
 }
 
-/* ── Init ── */
-window.addEventListener('resize', resizeMap);
-resizeMap();
+/* ── DARK THEME INJECTION FOR LEAFLET WIDGETS ── */
+const _s = document.createElement('style');
+_s.textContent = `
+  #leafletMap { position:absolute; inset:0; width:100%; height:100%; background:#030b1c; }
+  .climate-popup .leaflet-popup-content-wrapper {
+    background:rgba(3,11,28,0.97)!important;
+    border:1px solid rgba(0,207,255,0.28)!important;
+    border-radius:12px!important;
+    box-shadow:0 12px 40px rgba(0,0,0,0.85),0 0 24px rgba(0,150,255,0.12)!important;
+    color:#ddf0ff;
+  }
+  .climate-popup .leaflet-popup-content { margin:14px 16px; }
+  .climate-popup .leaflet-popup-tip { background:rgba(3,11,28,0.97)!important; }
+  .climate-popup .leaflet-popup-close-button { color:rgba(0,207,255,0.65)!important; font-size:18px!important; top:8px!important; right:10px!important; }
+  .climate-popup .leaflet-popup-close-button:hover { color:#00cfff!important; }
+  .leaflet-control-layers {
+    background:rgba(3,11,28,0.93)!important;
+    border:1px solid rgba(0,207,255,0.18)!important;
+    border-radius:10px!important; color:#aaddff!important;
+    box-shadow:0 4px 20px rgba(0,0,0,0.6)!important;
+  }
+  .leaflet-control-layers-toggle { background-color:rgba(0,207,255,0.12)!important; }
+  .leaflet-control-layers label { color:#aaddff!important; font-family:'DM Sans',sans-serif!important; font-size:12px!important; }
+  .leaflet-control-zoom a {
+    background:rgba(3,11,28,0.92)!important;
+    border-color:rgba(0,207,255,0.2)!important;
+    color:#00cfff!important; font-size:18px!important;
+  }
+  .leaflet-control-zoom a:hover { background:rgba(0,150,255,0.18)!important; }
+  .leaflet-control-attribution { background:rgba(2,8,22,0.65)!important; color:rgba(100,160,220,0.45)!important; font-size:9px!important; }
+  .leaflet-control-attribution a { color:rgba(0,200,255,0.5)!important; }
+  .leaflet-attribution-flag { display:none!important; }
+`;
+document.head.appendChild(_s);
+
+/* ── BOOT ── */
+initMap();
