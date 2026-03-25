@@ -1,0 +1,211 @@
+/* ════════════════════════════════════════
+   URBAN SMART CITY CLIMATE PREDICTOR
+   style.css
+════════════════════════════════════════ */
+
+:root {
+  --hot-r: #ff2020; --hot-g: #ff6a00;
+  --mod-r: #ffaa00; --mod-g: #ffe066;
+  --cool-r: #00d4ff; --cool-g: #00ff9d;
+  --panel: rgba(6,12,30,0.94);
+  --border: rgba(100,200,255,0.18);
+  --accent: #00cfff;
+  --text: #ddf0ff;
+  --bg: #030b1c;
+  --wood: #7a5010;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  cursor: default;
+}
+
+/* ─── LOADING ─── */
+#loading {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  transition: opacity .5s;
+}
+.load-city { display: flex; gap: 4px; align-items: flex-end; margin-bottom: 8px; }
+.load-bar {
+  width: 8px; background: var(--accent); border-radius: 3px 3px 0 0;
+  animation: loadbar 1.2s ease-in-out infinite alternate;
+}
+@keyframes loadbar {
+  0%  { opacity: .2; transform: scaleY(.3); }
+  100%{ opacity: 1;  transform: scaleY(1); }
+}
+.load-ring {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid rgba(0,207,255,.15);
+  border-top: 2px solid var(--accent);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading p {
+  font-family: 'Orbitron'; font-size: .72rem;
+  letter-spacing: 4px; color: var(--accent); opacity: .7;
+}
+
+/* ─── HEADER ─── */
+#hdr {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 54px;
+  background: linear-gradient(180deg, rgba(2,8,22,.98), rgba(2,8,22,.8));
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+}
+#hdr h1 {
+  font-family: 'Orbitron'; font-weight: 900; font-size: 1.05rem;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, #00cfff 0%, #fff 50%, #00cfff 100%);
+  background-size: 200%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 0%; }
+  100% { background-position: 200%; }
+}
+.hdr-legend { display: flex; gap: 20px; align-items: center; }
+.leg { display: flex; align-items: center; gap: 7px; font-size: .78rem; letter-spacing: .5px; font-weight: 500; }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+
+/* ─── SEARCH ─── */
+#searchWrap {
+  position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  background: rgba(4,14,38,.9);
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; backdrop-filter: blur(12px);
+  box-shadow: 0 4px 30px rgba(0,0,0,.5);
+}
+#cityInput {
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-family: 'DM Sans'; font-size: .9rem;
+  padding: 9px 18px; width: 270px;
+}
+#cityInput::placeholder { color: rgba(180,220,255,.35); }
+#searchBtn {
+  background: var(--accent); border: none; cursor: pointer;
+  color: #001a2e; font-family: 'Orbitron'; font-weight: 700;
+  font-size: .72rem; letter-spacing: 2px; padding: 9px 22px;
+  transition: filter .2s;
+}
+#searchBtn:hover { filter: brightness(1.2); }
+
+/* ─── MAP ─── */
+#mapWrap { position: fixed; top: 110px; left: 0; right: 0; bottom: 0; }
+#mapCanvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+
+/* ─── 3D SCENE ─── */
+#scene3d { position: fixed; top: 110px; left: 0; right: 0; bottom: 0; display: none; }
+#c3d { width: 100%; height: 100%; display: block; }
+
+/* ─── WEATHER PANEL ─── */
+#wp {
+  position: fixed; right: 18px; top: 118px; width: 292px;
+  background: var(--panel);
+  border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; backdrop-filter: blur(20px);
+  box-shadow: 0 12px 50px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+  display: none;
+  animation: slideWp .4s cubic-bezier(.2,0,.2,1);
+}
+@keyframes slideWp {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.wp-top {
+  padding: 14px 18px 10px;
+  background: linear-gradient(135deg, rgba(0,100,200,.35), rgba(0,30,80,.35));
+  border-bottom: 1px solid var(--border);
+}
+.wp-label { font-family: 'Orbitron'; font-size: .6rem; letter-spacing: 3px; color: var(--accent); opacity: .8; }
+.wp-city  { font-size: 1.05rem; font-weight: 600; color: #fff; margin-top: 2px; line-height: 1.2; }
+.wp-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 10px 18px 4px; padding: 5px 16px;
+  border-radius: 24px;
+  font-family: 'Orbitron'; font-weight: 700; font-size: .75rem; letter-spacing: 2px;
+}
+.wp-stats { padding: 4px 0 6px; }
+.wp-row { display: flex; align-items: center; gap: 10px; padding: 5px 18px; font-size: .88rem; }
+.wp-icon { font-size: 1rem; width: 22px; text-align: center; }
+.wp-key  { color: rgba(200,220,255,.6); flex: 1; }
+.wp-val  { font-weight: 600; font-size: .95rem; }
+.wp-adv-hdr {
+  margin-top: 4px; padding: 7px 18px;
+  background: rgba(255,60,60,.12);
+  border-top: 1px solid rgba(255,60,60,.25);
+  font-family: 'Orbitron'; font-size: .6rem; letter-spacing: 2.5px; color: #ff7070;
+}
+.wp-adv-body { padding: 8px 18px 14px; }
+.adv {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: .8rem; color: rgba(200,230,255,.75);
+  padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+  line-height: 1.4;
+}
+.adv:last-child { border-bottom: none; }
+
+/* ─── BACK BUTTON ─── */
+#backBtn {
+  position: fixed; top: 118px; left: 18px; z-index: 200;
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--accent); font-family: 'Orbitron'; font-weight: 700;
+  font-size: .65rem; letter-spacing: 2px;
+  padding: 9px 18px; border-radius: 9px; cursor: pointer;
+  display: none; backdrop-filter: blur(10px);
+  transition: background .2s, box-shadow .2s;
+}
+#backBtn:hover { background: rgba(0,180,255,.12); box-shadow: 0 0 20px rgba(0,200,255,.2); }
+
+/* ─── ZONE HUD ─── */
+#zoneHud {
+  position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+  display: none; gap: 10px; z-index: 200;
+  animation: fadeUp .5s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.ztag {
+  padding: 5px 18px; border-radius: 30px;
+  font-family: 'Orbitron'; font-weight: 700; font-size: .65rem; letter-spacing: 2px;
+  border: 1.5px solid currentColor; backdrop-filter: blur(8px);
+}
+
+/* ─── TOOLTIP ─── */
+#tip {
+  position: fixed; pointer-events: none;
+  background: rgba(4,14,38,.95); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 6px 12px; font-size: .8rem; color: #fff;
+  display: none; z-index: 400; backdrop-filter: blur(10px);
+  line-height: 1.5;
+}
+
+/* ─── INSTRUCTIONS ─── */
+#inst {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  font-size: .76rem; color: rgba(140,190,240,.45); letter-spacing: .8px;
+  pointer-events: none; z-index: 50; text-align: center; white-space: nowrap;
+}
+#ctrl3d {
+  position: fixed; bottom: 22px; left: 18px;
+  font-size: .72rem; color: rgba(100,160,220,.45);
+  letter-spacing: .3px; display: none; z-index: 200; line-height: 1.8;
+}
